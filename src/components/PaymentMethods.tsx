@@ -2,7 +2,8 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { CreditCard, Wallet } from "lucide-react";
+import { CreditCard, Wallet, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface PaymentMethodsProps {
   selectedMethod: string;
@@ -15,7 +16,22 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({
 }) => {
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-medium">Способ оплаты</h3>
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-medium">Способ оплаты</h3>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center text-sm text-muted-foreground cursor-pointer">
+                <Info className="h-4 w-4 mr-1" />
+                <span>Информация о получателе</span>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-xs">
+              <p>Оплата производится на реквизиты ИП Иванов И.И. (ОГРНИП: 123456789012345). Все платежи защищены.</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
       
       <RadioGroup value={selectedMethod} onValueChange={onSelectMethod} className="grid gap-4">
         <div className="flex items-center space-x-2 border rounded-lg p-4 hover:bg-secondary/50 transition-colors cursor-pointer">
@@ -24,7 +40,10 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({
             <div className="bg-emerald-100 p-2 rounded-full">
               <Wallet className="h-5 w-5 text-emerald-600" />
             </div>
-            <div className="font-medium">СБП</div>
+            <div>
+              <div className="font-medium">СБП</div>
+              <div className="text-xs text-muted-foreground">Быстрый перевод по номеру телефона +7 (999) 123-45-67</div>
+            </div>
           </Label>
         </div>
         
@@ -37,7 +56,10 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({
                 <path d="M12 14a2 2 0 100-4 2 2 0 000 4z" fill="white" />
               </svg>
             </div>
-            <div className="font-medium">ЮKassa</div>
+            <div>
+              <div className="font-medium">ЮKassa</div>
+              <div className="text-xs text-muted-foreground">Безопасная оплата через платёжный шлюз</div>
+            </div>
           </Label>
         </div>
         
@@ -47,10 +69,17 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({
             <div className="bg-purple-100 p-2 rounded-full">
               <CreditCard className="h-5 w-5 text-purple-600" />
             </div>
-            <div className="font-medium">Банковская карта</div>
+            <div>
+              <div className="font-medium">Банковская карта</div>
+              <div className="text-xs text-muted-foreground">Visa, MasterCard, МИР</div>
+            </div>
           </Label>
         </div>
       </RadioGroup>
+
+      <div className="mt-3 text-sm bg-blue-50 p-3 rounded-md border border-blue-100 text-blue-700">
+        <p>Все платежи обрабатываются через официальные платёжные системы и поступают на счёт ИП Иванов И.И. После оплаты вы получите чек в соответствии с ФЗ-54.</p>
+      </div>
     </div>
   );
 };
