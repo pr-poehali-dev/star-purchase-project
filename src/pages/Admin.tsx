@@ -132,25 +132,12 @@ const Admin: React.FC = () => {
               <div className="bg-amber-50 border border-amber-200 text-amber-800 p-3 rounded-md flex items-start gap-2">
                 <AlertTriangle className="h-5 w-5 flex-shrink-0 mt-0.5" />
                 <div className="text-sm">
-                  Эта страница доступна только по секретной ссылке. Если вы администратор, используйте следующую ссылку:
+                  Эта страница доступна только по секретной ссылке. Если вы администратор, используйте правильный ключ доступа.
                 </div>
               </div>
               <div className="bg-muted p-2 rounded text-xs font-mono break-all">
-                {window.location.origin}/admin/{secretKey}
+                Адрес: {window.location.origin}/admin/СПЕЦИАЛЬНЫЙ_КЛЮЧ
               </div>
-              <Button 
-                variant="secondary" 
-                className="w-full"
-                onClick={() => {
-                  navigator.clipboard.writeText(`${window.location.origin}/admin/${secretKey}`);
-                  toast({
-                    title: "Ссылка скопирована",
-                    description: "Секретная ссылка скопирована в буфер обмена",
-                  });
-                }}
-              >
-                Копировать ссылку
-              </Button>
             </div>
           </CardContent>
         </Card>

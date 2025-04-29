@@ -1,11 +1,8 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-// Генерация рандомного секретного ключа при первом запуске
-const generateSecretKey = () => {
-  return Math.random().toString(36).substring(2, 15) + 
-         Math.random().toString(36).substring(2, 15);
-};
+// Фиксированный секретный ключ для доступа к админ-панели
+const ADMIN_SECRET_KEY = "admin_secret_2025_key";
 
 interface AdminSecretContextType {
   secretKey: string;
@@ -38,21 +35,9 @@ const AdminSecretContext = createContext<AdminSecretContextType>({
 export const useAdminSecret = () => useContext(AdminSecretContext);
 
 export const AdminSecretProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
-  const [secretKey, setSecretKey] = useState('');
   const [siteSettings, setSiteSettings] = useState(DEFAULT_SETTINGS);
   
   useEffect(() => {
-    // Восстанавливаем ключ из localStorage или генерируем новый
-    const savedKey = localStorage.getItem('adminSecretKey');
-    const newKey = savedKey || generateSecretKey();
-    
-    if (!savedKey) {
-      localStorage.setItem('adminSecretKey', newKey);
-      console.log('New admin access key generated:', newKey);
-    }
-    
-    setSecretKey(newKey);
-    
     // Загружаем настройки сайта из localStorage
     const savedSettings = localStorage.getItem('siteSettings');
     if (savedSettings) {
@@ -61,7 +46,7 @@ export const AdminSecretProvider: React.FC<{children: React.ReactNode}> = ({ chi
   }, []);
   
   const isValidSecretKey = (key: string) => {
-    return key === secretKey;
+    return key === ADMIN_SECRET_KEY;
   };
   
   const updateSettings = (newSettings: Partial<typeof siteSettings>) => {
@@ -72,7 +57,7 @@ export const AdminSecretProvider: React.FC<{children: React.ReactNode}> = ({ chi
   
   return (
     <AdminSecretContext.Provider value={{ 
-      secretKey, 
+      secretKey: ADMIN_SECRET_KEY, 
       isValidSecretKey, 
       siteSettings,
       updateSettings
