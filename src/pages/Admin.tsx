@@ -151,131 +151,133 @@ const Admin: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20">
       <AdminHeader />
       
-      <main className="container mx-auto px-4 pb-8">
-        <Tabs defaultValue="orders">
-          <TabsList className="mb-6">
-            <TabsTrigger value="orders">Заказы</TabsTrigger>
-            <TabsTrigger value="chat">
-              Чат с пользователями 
-              <span className="ml-1 px-1.5 py-0.5 text-xs bg-destructive text-destructive-foreground rounded-full">
-                2
-              </span>
-            </TabsTrigger>
-            <TabsTrigger value="settings">Настройки</TabsTrigger>
-            <TabsTrigger value="payment">Платежные реквизиты</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="orders" className="space-y-6">
-            <StatsOverview {...stats} />
+      <main className="container-1920 mx-auto px-4 pb-8">
+        <div className="content-container mx-auto">
+          <Tabs defaultValue="orders">
+            <TabsList className="mb-6">
+              <TabsTrigger value="orders">Заказы</TabsTrigger>
+              <TabsTrigger value="chat">
+                Чат с пользователями 
+                <span className="ml-1 px-1.5 py-0.5 text-xs bg-destructive text-destructive-foreground rounded-full">
+                  2
+                </span>
+              </TabsTrigger>
+              <TabsTrigger value="settings">Настройки</TabsTrigger>
+              <TabsTrigger value="payment">Платежные реквизиты</TabsTrigger>
+            </TabsList>
             
-            <OrdersCard 
-              orders={orders}
-              filter={filter}
-              setFilter={setFilter}
-              updateOrderStatus={updateOrderStatus}
-              clearAllOrders={clearAllOrders}
-            />
-          </TabsContent>
-          
-          <TabsContent value="chat">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MessageSquare className="h-5 w-5" /> 
-                  Чат с пользователями
-                </CardTitle>
-                <CardDescription>
-                  Общайтесь с зарегистрированными пользователями сервиса
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <UserChat adminName="Администратор" />
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="settings">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Settings className="h-5 w-5" /> 
-                  Настройки сайта
-                </CardTitle>
-                <CardDescription>
-                  Настройте параметры работы сайта
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium" htmlFor="starPrice">
-                      Цена за 1 звезду (₽)
-                    </label>
-                    <Input 
-                      id="starPrice"
-                      type="number" 
-                      step="0.01"
-                      value={tempSettings.starPrice} 
-                      onChange={(e) => setTempSettings({...tempSettings, starPrice: parseFloat(e.target.value)})}
-                    />
+            <TabsContent value="orders" className="space-y-6">
+              <StatsOverview {...stats} />
+              
+              <OrdersCard 
+                orders={orders}
+                filter={filter}
+                setFilter={setFilter}
+                updateOrderStatus={updateOrderStatus}
+                clearAllOrders={clearAllOrders}
+              />
+            </TabsContent>
+            
+            <TabsContent value="chat">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MessageSquare className="h-5 w-5" /> 
+                    Чат с пользователями
+                  </CardTitle>
+                  <CardDescription>
+                    Общайтесь с зарегистрированными пользователями сервиса
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <UserChat adminName="Администратор" />
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="settings">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Settings className="h-5 w-5" /> 
+                    Настройки сайта
+                  </CardTitle>
+                  <CardDescription>
+                    Настройте параметры работы сайта
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium" htmlFor="starPrice">
+                        Цена за 1 звезду (₽)
+                      </label>
+                      <Input 
+                        id="starPrice"
+                        type="number" 
+                        step="0.01"
+                        value={tempSettings.starPrice} 
+                        onChange={(e) => setTempSettings({...tempSettings, starPrice: parseFloat(e.target.value)})}
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium" htmlFor="companyName">
+                        Название компании (ИП)
+                      </label>
+                      <Input 
+                        id="companyName"
+                        value={tempSettings.companyName} 
+                        onChange={(e) => setTempSettings({...tempSettings, companyName: e.target.value})}
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium" htmlFor="minStars">
+                        Минимальное количество звезд
+                      </label>
+                      <Input 
+                        id="minStars"
+                        type="number" 
+                        value={tempSettings.minStars} 
+                        onChange={(e) => setTempSettings({...tempSettings, minStars: parseInt(e.target.value)})}
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium" htmlFor="maxStars">
+                        Максимальное количество звезд
+                      </label>
+                      <Input 
+                        id="maxStars"
+                        type="number" 
+                        value={tempSettings.maxStars} 
+                        onChange={(e) => setTempSettings({...tempSettings, maxStars: parseInt(e.target.value)})}
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium" htmlFor="phoneNumber">
+                        Номер телефона для платежей
+                      </label>
+                      <Input 
+                        id="phoneNumber"
+                        value={tempSettings.phoneNumber} 
+                        onChange={(e) => setTempSettings({...tempSettings, phoneNumber: e.target.value})}
+                      />
+                    </div>
                   </div>
                   
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium" htmlFor="companyName">
-                      Название компании (ИП)
-                    </label>
-                    <Input 
-                      id="companyName"
-                      value={tempSettings.companyName} 
-                      onChange={(e) => setTempSettings({...tempSettings, companyName: e.target.value})}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium" htmlFor="minStars">
-                      Минимальное количество звезд
-                    </label>
-                    <Input 
-                      id="minStars"
-                      type="number" 
-                      value={tempSettings.minStars} 
-                      onChange={(e) => setTempSettings({...tempSettings, minStars: parseInt(e.target.value)})}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium" htmlFor="maxStars">
-                      Максимальное количество звезд
-                    </label>
-                    <Input 
-                      id="maxStars"
-                      type="number" 
-                      value={tempSettings.maxStars} 
-                      onChange={(e) => setTempSettings({...tempSettings, maxStars: parseInt(e.target.value)})}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium" htmlFor="phoneNumber">
-                      Номер телефона для платежей
-                    </label>
-                    <Input 
-                      id="phoneNumber"
-                      value={tempSettings.phoneNumber} 
-                      onChange={(e) => setTempSettings({...tempSettings, phoneNumber: e.target.value})}
-                    />
-                  </div>
-                </div>
-                
-                <Button onClick={saveSettings}>Сохранить настройки</Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="payment">
-            <PaymentInfo />
-          </TabsContent>
-        </Tabs>
+                  <Button onClick={saveSettings}>Сохранить настройки</Button>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="payment">
+              <PaymentInfo />
+            </TabsContent>
+          </Tabs>
+        </div>
       </main>
     </div>
   );

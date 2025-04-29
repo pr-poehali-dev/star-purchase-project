@@ -100,8 +100,8 @@ const Index: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/30">
       <Header />
       
-      <main className="container mx-auto px-4 py-8 md:py-12">
-        <div className="max-w-2xl mx-auto">
+      <main className="container-1920 mx-auto px-4 py-8 md:py-12">
+        <div className="content-container max-w-2xl mx-auto">
           <Card className="border-t-4 border-t-primary">
             <CardHeader>
               <CardTitle className="text-2xl">Купить звезды Telegram</CardTitle>

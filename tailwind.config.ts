@@ -14,7 +14,12 @@ export default {
 			center: true,
 			padding: '2rem',
 			screens: {
-				'2xl': '1400px'
+				'sm': '640px',
+				'md': '768px',
+				'lg': '1024px',
+				'xl': '1280px',
+				'2xl': '1536px',
+				'3xl': '1920px'  // Добавляем размер для широких экранов
 			}
 		},
 		extend: {
@@ -107,6 +112,14 @@ export default {
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'float': 'float 3s ease-in-out infinite',
 				'pulse-light': 'pulse-light 3s ease-in-out infinite'
+			},
+			screens: {
+				'3xl': '1920px',  // Добавляем размер для широких экранов
+				'fullhd': {'raw': '(min-width: 1920px) and (min-height: 1080px)'}
+			},
+			height: {
+				'screen-80': '80vh',
+				'screen-90': '90vh',
 			}
 		}
 	},

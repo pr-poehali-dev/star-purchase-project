@@ -91,5 +91,52 @@
 
   body {
     @apply bg-background text-foreground;
+    width: 100%;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  html, body {
+    max-width: 100%;
+  }
+}
+
+/* Оптимизация для разрешения 1920x1080 */
+@layer utilities {
+  .container-1920 {
+    max-width: 1920px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+  
+  .content-container {
+    max-width: 1600px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  @media (min-width: 1921px) {
+    .container-1920 {
+      border-left: 1px solid hsl(var(--border));
+      border-right: 1px solid hsl(var(--border));
+    }
+  }
+  
+  @media (max-width: 1920px) {
+    .container-1920 {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .container-1920 {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
   }
 }
