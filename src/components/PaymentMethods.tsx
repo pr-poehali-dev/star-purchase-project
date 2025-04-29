@@ -42,7 +42,7 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({
             </div>
             <div>
               <div className="font-medium">СБП</div>
-              <div className="text-xs text-muted-foreground">Быстрый перевод по номеру телефона +7 (999) 123-45-67</div>
+              <div className="text-xs text-muted-foreground">Быстрый перевод по номеру телефона +7 (988) 311-56-45</div>
             </div>
           </Label>
         </div>
