@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Star, Send } from "lucide-react";
+import UserMenu from "./UserMenu";
 
 const Header: React.FC = () => {
   return (
@@ -15,28 +16,31 @@ const Header: React.FC = () => {
           </div>
           <span className="font-bold text-lg">Звёзды Telegram</span>
         </Link>
-        <nav>
-          <ul className="flex gap-4">
-            <li>
-              <a 
-                href="https://t.me/" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Telegram
-              </a>
-            </li>
-            <li>
-              <a 
-                href="#" 
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Поддержка
-              </a>
-            </li>
-          </ul>
-        </nav>
+        <div className="flex items-center gap-4">
+          <nav>
+            <ul className="flex gap-4">
+              <li>
+                <a 
+                  href="https://t.me/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Telegram
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="#" 
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Поддержка
+                </a>
+              </li>
+            </ul>
+          </nav>
+          <UserMenu />
+        </div>
       </div>
     </header>
   );
