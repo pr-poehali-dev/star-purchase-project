@@ -5,13 +5,14 @@ import AdminHeader from "@/components/admin/AdminHeader";
 import StatsOverview from "@/components/admin/StatsOverview";
 import OrdersCard from "@/components/admin/OrdersCard";
 import PaymentInfo from "@/components/admin/PaymentInfo";
+import UserChat from "@/components/admin/UserChat";
 import { useAdminSecret } from "@/contexts/AdminSecretContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { Settings, AlertTriangle, Lock } from "lucide-react";
+import { Settings, AlertTriangle, Lock, MessageSquare } from "lucide-react";
 
 interface Order {
   id: number;
@@ -21,6 +22,7 @@ interface Order {
   totalPrice: number;
   status: string;
   date: string;
+  userEmail?: string;
 }
 
 interface Stats {
@@ -153,6 +155,12 @@ const Admin: React.FC = () => {
         <Tabs defaultValue="orders">
           <TabsList className="mb-6">
             <TabsTrigger value="orders">Заказы</TabsTrigger>
+            <TabsTrigger value="chat">
+              Чат с пользователями 
+              <span className="ml-1 px-1.5 py-0.5 text-xs bg-destructive text-destructive-foreground rounded-full">
+                2
+              </span>
+            </TabsTrigger>
             <TabsTrigger value="settings">Настройки</TabsTrigger>
             <TabsTrigger value="payment">Платежные реквизиты</TabsTrigger>
           </TabsList>
@@ -167,6 +175,23 @@ const Admin: React.FC = () => {
               updateOrderStatus={updateOrderStatus}
               clearAllOrders={clearAllOrders}
             />
+          </TabsContent>
+          
+          <TabsContent value="chat">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5" /> 
+                  Чат с пользователями
+                </CardTitle>
+                <CardDescription>
+                  Общайтесь с зарегистрированными пользователями сервиса
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <UserChat adminName="Администратор" />
+              </CardContent>
+            </Card>
           </TabsContent>
           
           <TabsContent value="settings">
