@@ -1,7 +1,15 @@
+
 import React from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardHeader, 
+  CardTitle 
+} from "@/components/ui/card";
 import OrderTable from "./OrderTable";
+import { Button } from "@/components/ui/button";
+import { Trash2 } from "lucide-react";
 
 interface Order {
   id: number;
@@ -16,47 +24,90 @@ interface Order {
 interface OrdersCardProps {
   orders: Order[];
   filter: string;
-  setFilter: (value: string) => void;
+  setFilter: (filter: string) => void;
   updateOrderStatus: (id: number, newStatus: string) => void;
+  clearAllOrders: () => void;
 }
 
 const OrdersCard: React.FC<OrdersCardProps> = ({ 
   orders, 
   filter, 
   setFilter, 
-  updateOrderStatus 
+  updateOrderStatus,
+  clearAllOrders
 }) => {
   const filteredOrders = filter === "all" 
     ? orders 
     : orders.filter(order => order.status === filter);
 
   return (
-    <Card className="mb-8">
-      <CardHeader>
-        <div className="flex justify-between items-center">
-          <CardTitle>Заказы</CardTitle>
-          <Select value={filter} onValueChange={setFilter}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Все заказы" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Все заказы</SelectItem>
-              <SelectItem value="Новый">Новые</SelectItem>
-              <SelectItem value="В обработке">В обработке</SelectItem>
-              <SelectItem value="Выполнен">Выполненные</SelectItem>
-              <SelectItem value="Отменён">Отменённые</SelectItem>
-            </SelectContent>
-          </Select>
+    <Card>
+      <CardHeader className="flex flex-row items-start justify-between">
+        <div>
+          <CardTitle>Заказы звёзд Telegram</CardTitle>
+          <CardDescription>
+            Управление заказами и проверка статусов
+          </CardDescription>
         </div>
-        <CardDescription>
-          Управление заказами и выплатами
-        </CardDescription>
+        
+        <div className="flex items-center gap-2">
+          <div className="flex bg-muted rounded-md overflow-hidden">
+            <button 
+              className={`px-3 py-1 text-xs ${filter === "all" ? "bg-primary text-primary-foreground" : ""}`}
+              onClick={() => setFilter("all")}
+            >
+              Все
+            </button>
+            <button 
+              className={`px-3 py-1 text-xs ${filter === "Новый" ? "bg-primary text-primary-foreground" : ""}`}
+              onClick={() => setFilter("Новый")}
+            >
+              Новые
+            </button>
+            <button 
+              className={`px-3 py-1 text-xs ${filter === "В обработке" ? "bg-primary text-primary-foreground" : ""}`}
+              onClick={() => setFilter("В обработке")}
+            >
+              В обработке
+            </button>
+            <button 
+              className={`px-3 py-1 text-xs ${filter === "Выполнен" ? "bg-primary text-primary-foreground" : ""}`}
+              onClick={() => setFilter("Выполнен")}
+            >
+              Выполненные
+            </button>
+            <button 
+              className={`px-3 py-1 text-xs ${filter === "Отменён" ? "bg-primary text-primary-foreground" : ""}`}
+              onClick={() => setFilter("Отменён")}
+            >
+              Отменённые
+            </button>
+          </div>
+          
+          <Button 
+            variant="destructive" 
+            size="sm"
+            className="flex items-center gap-1"
+            onClick={clearAllOrders}
+          >
+            <Trash2 className="h-4 w-4" />
+            <span className="hidden sm:inline">Очистить</span>
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
-        <OrderTable 
-          orders={filteredOrders} 
-          updateOrderStatus={updateOrderStatus} 
-        />
+        {filteredOrders.length > 0 ? (
+          <OrderTable 
+            orders={filteredOrders} 
+            updateOrderStatus={updateOrderStatus}
+          />
+        ) : (
+          <div className="text-center py-8 text-muted-foreground">
+            {filter === "all" 
+              ? "Нет заказов для отображения" 
+              : `Нет заказов со статусом "${filter}"`}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
