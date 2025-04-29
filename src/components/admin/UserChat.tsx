@@ -4,9 +4,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Send, User } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Send, User, LifeBuoy, Users } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 interface Message {
   id: string;
@@ -14,6 +16,7 @@ interface Message {
   text: string;
   timestamp: string;
   read: boolean;
+  senderName?: string;
 }
 
 interface ChatUser {
@@ -29,24 +32,38 @@ interface UserChatProps {
 
 const UserChat: React.FC<UserChatProps> = ({ adminName = "Администратор" }) => {
   const [users, setUsers] = useState<ChatUser[]>([]);
+  const [supportUsers, setSupportUsers] = useState<ChatUser[]>([]);
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
+  const [chatType, setChatType] = useState<'support' | 'direct'>('support');
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [totalUnreadCount, setTotalUnreadCount] = useState(0);
+  const { toast } = useToast();
   
-  // Загрузка списка пользователей и сообщений
+  // Загрузка списка пользователей
   useEffect(() => {
     loadUsers();
+    
+    // Обновление каждые 5 секунд для получения новых сообщений
+    const intervalId = setInterval(() => {
+      loadUsers();
+      if (selectedUser) {
+        loadMessages(selectedUser, chatType === 'support');
+      }
+    }, 5000);
+    
+    return () => clearInterval(intervalId);
   }, []);
   
   // Загрузка сообщений при выборе пользователя
   useEffect(() => {
     if (selectedUser) {
-      loadMessages(selectedUser);
+      loadMessages(selectedUser, chatType === 'support');
       // Помечаем сообщения как прочитанные
-      markMessagesAsRead(selectedUser);
+      markMessagesAsRead(selectedUser, chatType === 'support');
     }
-  }, [selectedUser]);
+  }, [selectedUser, chatType]);
   
   // Прокрутка к последнему сообщению
   useEffect(() => {
@@ -54,89 +71,130 @@ const UserChat: React.FC<UserChatProps> = ({ adminName = "Администрат
   }, [messages]);
   
   const loadUsers = () => {
-    // В реальном приложении здесь будет запрос к API
-    // Получаем список зарегистрированных пользователей из localStorage
     const registeredUsers: ChatUser[] = [];
+    const supportUsersList: ChatUser[] = [];
+    let unreadTotal = 0;
     
-    // Проверяем наличие пользователей в localStorage
+    // Сначала загружаем список обращений в техподдержку
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key?.startsWith('userEmail_')) {
-        const email = localStorage.getItem(key);
-        if (email) {
-          const nameKey = 'userName_' + key.split('_')[1];
-          const name = localStorage.getItem(nameKey) || undefined;
+      if (key?.startsWith('support_chat_')) {
+        const userEmail = key.replace('support_chat_', '');
+        const supportMessages = JSON.parse(localStorage.getItem(key) || '[]') as Message[];
+        
+        if (supportMessages.length > 0) {
+          // Ищем имя пользователя
+          let userName = userEmail;
+          for (let j = 0; j < localStorage.length; j++) {
+            const nameKey = localStorage.key(j);
+            if (nameKey?.startsWith('userName_')) {
+              const userId = nameKey.split('_')[1];
+              const email = localStorage.getItem(`userEmail_${userId}`);
+              if (email === userEmail) {
+                userName = localStorage.getItem(nameKey) || userEmail;
+                break;
+              }
+            }
+          }
           
-          // Получаем количество непрочитанных сообщений
-          const messages = JSON.parse(localStorage.getItem(`chat_${email}`) || '[]') as Message[];
-          const unreadCount = messages.filter(m => m.from === 'user' && !m.read).length;
+          // Считаем непрочитанные сообщения
+          const unreadCount = supportMessages.filter(m => m.from === 'user' && !m.read).length;
           
-          registeredUsers.push({
-            email,
-            name,
-            lastActive: new Date().toISOString(),
-            unreadCount
+          if (unreadCount > 0) {
+            unreadTotal += unreadCount;
+          }
+          
+          supportUsersList.push({
+            email: userEmail,
+            name: userName,
+            lastActive: supportMessages[supportMessages.length - 1].timestamp,
+            unreadCount: unreadCount
           });
         }
       }
     }
     
-    // Если нет пользователей из localStorage, добавляем тестовых
-    if (registeredUsers.length === 0) {
-      registeredUsers.push(
-        {
-          email: 'user@gmail.com',
-          name: 'Пользователь Google',
-          lastActive: new Date().toISOString(),
-          unreadCount: 2
-        },
-        {
-          email: 'test@example.com',
-          name: 'Тестовый пользователь',
-          lastActive: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-          unreadCount: 0
+    // Загружаем список пользователей для обычного чата
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key?.startsWith('userEmail_')) {
+        const userId = key.split('_')[1];
+        const email = localStorage.getItem(key);
+        
+        if (email) {
+          const nameKey = 'userName_' + userId;
+          const name = localStorage.getItem(nameKey) || undefined;
+          
+          // Проверяем, есть ли непрочитанные сообщения в обычном чате
+          const chatKey = `chat_${email}`;
+          const messages = JSON.parse(localStorage.getItem(chatKey) || '[]') as Message[];
+          const unreadCount = messages.filter(m => m.from === 'user' && !m.read).length;
+          
+          if (unreadCount > 0) {
+            unreadTotal += unreadCount;
+          }
+          
+          // Проверяем, не добавлен ли уже этот пользователь в список техподдержки
+          if (!supportUsersList.some(u => u.email === email)) {
+            registeredUsers.push({
+              email,
+              name,
+              lastActive: messages.length > 0 ? messages[messages.length - 1].timestamp : new Date().toISOString(),
+              unreadCount
+            });
+          }
         }
-      );
+      }
     }
     
-    setUsers(registeredUsers);
+    // Сортируем списки по наличию непрочитанных сообщений и дате последней активности
+    const sortUsers = (a: ChatUser, b: ChatUser) => {
+      if (a.unreadCount > 0 && b.unreadCount === 0) return -1;
+      if (a.unreadCount === 0 && b.unreadCount > 0) return 1;
+      return new Date(b.lastActive).getTime() - new Date(a.lastActive).getTime();
+    };
     
-    // Если есть хотя бы один пользователь, выбираем его
-    if (registeredUsers.length > 0 && !selectedUser) {
-      setSelectedUser(registeredUsers[0].email);
+    registeredUsers.sort(sortUsers);
+    supportUsersList.sort(sortUsers);
+    
+    setUsers(registeredUsers);
+    setSupportUsers(supportUsersList);
+    setTotalUnreadCount(unreadTotal);
+    
+    // Обновляем localStorage для индикатора на интерфейсе
+    localStorage.setItem('admin_unread_count', unreadTotal.toString());
+    
+    // Обновляем счетчик непрочитанных сообщений в техподдержке
+    const supportUnreadCount = supportUsersList.reduce((acc, user) => acc + user.unreadCount, 0);
+    localStorage.setItem('admin_unread_support_count', supportUnreadCount.toString());
+    
+    // Если выбранного пользователя нет, выбираем первого с непрочитанными сообщениями
+    if (!selectedUser) {
+      if (supportUsersList.length > 0 && supportUsersList.some(u => u.unreadCount > 0)) {
+        setSelectedUser(supportUsersList.find(u => u.unreadCount > 0)?.email || supportUsersList[0].email);
+        setChatType('support');
+      } else if (registeredUsers.length > 0 && registeredUsers.some(u => u.unreadCount > 0)) {
+        setSelectedUser(registeredUsers.find(u => u.unreadCount > 0)?.email || registeredUsers[0].email);
+        setChatType('direct');
+      } else if (supportUsersList.length > 0) {
+        setSelectedUser(supportUsersList[0].email);
+        setChatType('support');
+      } else if (registeredUsers.length > 0) {
+        setSelectedUser(registeredUsers[0].email);
+        setChatType('direct');
+      }
     }
   };
   
-  const loadMessages = (userEmail: string) => {
-    // В реальном приложении здесь будет запрос к API
-    let userMessages = JSON.parse(localStorage.getItem(`chat_${userEmail}`) || '[]') as Message[];
-    
-    // Если нет сообщений, добавляем тестовые
-    if (userMessages.length === 0 && userEmail === 'user@gmail.com') {
-      userMessages = [
-        {
-          id: '1',
-          from: 'user',
-          text: 'Здравствуйте! У меня вопрос по оплате.',
-          timestamp: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
-          read: false
-        },
-        {
-          id: '2',
-          from: 'user',
-          text: 'Не могу найти, где посмотреть статус заказа.',
-          timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-          read: false
-        }
-      ];
-      localStorage.setItem(`chat_${userEmail}`, JSON.stringify(userMessages));
-    }
-    
+  const loadMessages = (userEmail: string, isSupport: boolean) => {
+    const chatKey = isSupport ? `support_chat_${userEmail}` : `chat_${userEmail}`;
+    const userMessages = JSON.parse(localStorage.getItem(chatKey) || '[]') as Message[];
     setMessages(userMessages);
   };
   
-  const markMessagesAsRead = (userEmail: string) => {
-    const userMessages = JSON.parse(localStorage.getItem(`chat_${userEmail}`) || '[]') as Message[];
+  const markMessagesAsRead = (userEmail: string, isSupport: boolean) => {
+    const chatKey = isSupport ? `support_chat_${userEmail}` : `chat_${userEmail}`;
+    const userMessages = JSON.parse(localStorage.getItem(chatKey) || '[]') as Message[];
     
     const updatedMessages = userMessages.map(msg => {
       if (msg.from === 'user' && !msg.read) {
@@ -145,7 +203,7 @@ const UserChat: React.FC<UserChatProps> = ({ adminName = "Администрат
       return msg;
     });
     
-    localStorage.setItem(`chat_${userEmail}`, JSON.stringify(updatedMessages));
+    localStorage.setItem(chatKey, JSON.stringify(updatedMessages));
     setMessages(updatedMessages);
     
     // Обновляем список пользователей, чтобы обновить счетчик непрочитанных
@@ -160,13 +218,28 @@ const UserChat: React.FC<UserChatProps> = ({ adminName = "Администрат
       from: 'admin',
       text: newMessage.trim(),
       timestamp: new Date().toISOString(),
-      read: false
+      read: false,
+      senderName: adminName
     };
+    
+    const chatKey = chatType === 'support' 
+      ? `support_chat_${selectedUser}` 
+      : `chat_${selectedUser}`;
     
     const updatedMessages = [...messages, newMsg];
     setMessages(updatedMessages);
-    localStorage.setItem(`chat_${selectedUser}`, JSON.stringify(updatedMessages));
+    localStorage.setItem(chatKey, JSON.stringify(updatedMessages));
     setNewMessage("");
+    
+    toast({
+      title: "Сообщение отправлено",
+      description: `Сообщение отправлено пользователю ${getUserName(selectedUser)}`,
+    });
+  };
+  
+  const handleUserSelect = (email: string, isSupport: boolean) => {
+    setSelectedUser(email);
+    setChatType(isSupport ? 'support' : 'direct');
   };
   
   const formatTime = (dateString: string) => {
@@ -190,7 +263,7 @@ const UserChat: React.FC<UserChatProps> = ({ adminName = "Администрат
   };
   
   const getUserName = (email: string) => {
-    const user = users.find(u => u.email === email);
+    const user = [...users, ...supportUsers].find(u => u.email === email);
     return user?.name || email;
   };
   
@@ -208,50 +281,138 @@ const UserChat: React.FC<UserChatProps> = ({ adminName = "Администрат
       {/* Список пользователей */}
       <Card className="md:col-span-1 flex flex-col">
         <CardHeader className="px-3 py-4">
-          <CardTitle className="text-base">Пользователи</CardTitle>
-          <CardDescription>Все зарегистрированные пользователи</CardDescription>
+          <CardTitle className="text-base">Чаты с пользователями</CardTitle>
+          <CardDescription>
+            {totalUnreadCount > 0 ? 
+              `У вас ${totalUnreadCount} непрочитанных сообщений` : 
+              'Все сообщения прочитаны'}
+          </CardDescription>
         </CardHeader>
-        <CardContent className="px-3 flex-grow overflow-auto">
-          <ScrollArea className="h-full">
-            <div className="space-y-2">
-              {users.map(user => (
-                <div 
-                  key={user.email}
-                  className={`flex items-center space-x-3 px-3 py-2 rounded-md cursor-pointer ${
-                    selectedUser === user.email 
-                      ? 'bg-primary text-primary-foreground' 
-                      : 'hover:bg-secondary'
-                  }`}
-                  onClick={() => setSelectedUser(user.email)}
-                >
-                  <Avatar>
-                    <AvatarFallback>
-                      {getInitials(user.name || user.email)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium truncate">
-                        {user.name || user.email}
-                      </p>
-                      <p className="text-xs opacity-70">
-                        {formatDate(user.lastActive)}
-                      </p>
+        
+        <Tabs defaultValue="support" className="px-3">
+          <TabsList className="w-full grid grid-cols-2 mb-2">
+            <TabsTrigger value="support" className="flex items-center gap-1">
+              <LifeBuoy className="h-4 w-4" />
+              Поддержка
+              {supportUsers.some(u => u.unreadCount > 0) && (
+                <Badge variant="destructive" className="ml-1 h-5 w-5 p-0 flex items-center justify-center">
+                  {supportUsers.reduce((acc, u) => acc + u.unreadCount, 0)}
+                </Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="direct" className="flex items-center gap-1">
+              <Users className="h-4 w-4" />
+              Все
+              {users.some(u => u.unreadCount > 0) && (
+                <Badge variant="destructive" className="ml-1 h-5 w-5 p-0 flex items-center justify-center">
+                  {users.reduce((acc, u) => acc + u.unreadCount, 0)}
+                </Badge>
+              )}
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="support" className="mt-0">
+            <CardContent className="px-0 py-2 flex-grow overflow-auto h-[450px]">
+              <ScrollArea className="h-full">
+                <div className="space-y-2">
+                  {supportUsers.length === 0 ? (
+                    <div className="text-center py-6 text-muted-foreground">
+                      <LifeBuoy className="mx-auto h-8 w-8 opacity-30 mb-2" />
+                      <p className="text-sm">Нет обращений в техподдержку</p>
                     </div>
-                    <p className="text-xs truncate opacity-70">
-                      {user.email}
-                    </p>
-                  </div>
-                  {user.unreadCount > 0 && (
-                    <Badge variant="destructive" className="ml-auto">
-                      {user.unreadCount}
-                    </Badge>
+                  ) : (
+                    supportUsers.map(user => (
+                      <div 
+                        key={user.email + '_support'}
+                        className={`flex items-center space-x-3 px-3 py-2 rounded-md cursor-pointer ${
+                          selectedUser === user.email && chatType === 'support'
+                            ? 'bg-primary text-primary-foreground' 
+                            : 'hover:bg-secondary'
+                        }`}
+                        onClick={() => handleUserSelect(user.email, true)}
+                      >
+                        <Avatar>
+                          <AvatarFallback>
+                            {getInitials(user.name || user.email)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between">
+                            <p className="text-sm font-medium truncate">
+                              {user.name || user.email}
+                            </p>
+                            <p className="text-xs opacity-70">
+                              {formatDate(user.lastActive)}
+                            </p>
+                          </div>
+                          <p className="text-xs truncate opacity-70">
+                            {user.email}
+                          </p>
+                        </div>
+                        {user.unreadCount > 0 && (
+                          <Badge variant="destructive" className="ml-auto">
+                            {user.unreadCount}
+                          </Badge>
+                        )}
+                      </div>
+                    ))
                   )}
                 </div>
-              ))}
-            </div>
-          </ScrollArea>
-        </CardContent>
+              </ScrollArea>
+            </CardContent>
+          </TabsContent>
+          
+          <TabsContent value="direct" className="mt-0">
+            <CardContent className="px-0 py-2 flex-grow overflow-auto h-[450px]">
+              <ScrollArea className="h-full">
+                <div className="space-y-2">
+                  {users.length === 0 ? (
+                    <div className="text-center py-6 text-muted-foreground">
+                      <User className="mx-auto h-8 w-8 opacity-30 mb-2" />
+                      <p className="text-sm">Нет зарегистрированных пользователей</p>
+                    </div>
+                  ) : (
+                    users.map(user => (
+                      <div 
+                        key={user.email}
+                        className={`flex items-center space-x-3 px-3 py-2 rounded-md cursor-pointer ${
+                          selectedUser === user.email && chatType === 'direct'
+                            ? 'bg-primary text-primary-foreground' 
+                            : 'hover:bg-secondary'
+                        }`}
+                        onClick={() => handleUserSelect(user.email, false)}
+                      >
+                        <Avatar>
+                          <AvatarFallback>
+                            {getInitials(user.name || user.email)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between">
+                            <p className="text-sm font-medium truncate">
+                              {user.name || user.email}
+                            </p>
+                            <p className="text-xs opacity-70">
+                              {formatDate(user.lastActive)}
+                            </p>
+                          </div>
+                          <p className="text-xs truncate opacity-70">
+                            {user.email}
+                          </p>
+                        </div>
+                        {user.unreadCount > 0 && (
+                          <Badge variant="destructive" className="ml-auto">
+                            {user.unreadCount}
+                          </Badge>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </TabsContent>
+        </Tabs>
       </Card>
       
       {/* Чат */}
@@ -265,7 +426,14 @@ const UserChat: React.FC<UserChatProps> = ({ adminName = "Администрат
                 </AvatarFallback>
               </Avatar>
               <div>
-                <CardTitle className="text-base">{getUserName(selectedUser)}</CardTitle>
+                <CardTitle className="text-base flex items-center gap-2">
+                  {getUserName(selectedUser)}
+                  {chatType === 'support' && (
+                    <Badge variant="outline" className="ml-2 font-normal">
+                      Техподдержка
+                    </Badge>
+                  )}
+                </CardTitle>
                 <CardDescription className="text-xs">{selectedUser}</CardDescription>
               </div>
             </div>
