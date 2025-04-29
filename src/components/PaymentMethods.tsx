@@ -77,6 +77,11 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({
         </div>
       </RadioGroup>
 
+      <div className="mt-5 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800">
+        <p className="font-medium mb-2">Инструкция по оплате:</p>
+        <p>Для создания заказа нажмите кнопку "Оплатить" и отправьте денежные средства по СБП на номер +79883115645 банк ЮMoney Анна Леонидовна</p>
+      </div>
+
       <div className="mt-3 text-sm bg-blue-50 p-3 rounded-md border border-blue-100 text-blue-700">
         <p>Все платежи обрабатываются через официальные платёжные системы и поступают на счёт ИП Иванов И.И. После оплаты вы получите чек в соответствии с ФЗ-54.</p>
       </div>
