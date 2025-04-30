@@ -1,0 +1,76 @@
+
+importrobuxOrders') || '[]');
+       React from "react";
+import { Carorders.push(newOrder);
+      localStoraged, CardContent } from "@/components/.setItem('robuxOrders', JSONui/card";
+import {.stringify(orders));
+
+      toast Separator } from "@/components/ui/separator";({
+        title: "Заказ создан",
+        description: `
+
+interface RobuxPriceCalculatorPropsЗаказ #${new {
+  robuxCount: number;Order.id} успешно создан.
+  robuxRate: number;
+}
+
+const RobuxPriceCalculator: Пожалуйста, вы React.FC<RobuxPriceполните оплату.`,
+      CalculatorProps> = ({
+  robuxCount,
+  robuxRate,
+})});
+
+      setIsCreatingOrder(false);
+      // Сбрас => {
+  const totalPrice = (robuxCount / robuxRate).toFixed(2);ываем форму
+      setRobloxUsername("");
+      setRobuxAmount(100);
+      setPaymentMethod("sbp");
+  const rateText = `1 
+    }, 1000);
+  };₽ = ${robuxRate} R
+
+  // Расчет ст$`;
+  
+  return (
+    <Card classNameоимости в рублях
+  const priceInRubles = (robuxAmount="border-2">
+      <CardContent / exchangeRate).toFixed(2);
+
+  return (
+    <div className=" className="pt-6 space-y-4">
+        <div className="flex justifymin-h-screen bg-gradient-between items-center">
+          <span-to-b from-background to-green className="text-muted-foreground">-50">
+      <RobuxHeader />
+      Количество Robux</span>
+          
+      <main className="container-<span className="font-medium">{robuxCount} R$</span>
+        </div1920 mx-auto px-4 py->
+        
+        <div className="8 md:py-12">flex justify-between items-center">
+          
+        <div className="content<span className="text-muted-foreground">Курс обмена-container max-w-2xl mx-auto"></span>
+          <span className="font-medium">{rateText}</span>
+          <Card className="border-t
+        </div>
+        
+        -4 border-t-green-600<Separator />
+        
+        <div className="flex justify-between items-center">
+          <span">
+            <CardHeader>
+              <CardTitle className="font-medium">Ит className="text-2xl">Купого к оплате</span>
+          <spanить Robux</CardTitle>
+               className="text-xl font-bol<CardDescription>
+                Пd text-primary">{totalPrice} ₽ополните счет Robux для</span>
+        </div>
+       своего аккаунта Roblox</CardContent>
+    </Card>
+              </CardDescription>
+            </Car
+  );
+};
+
+export default RobuxdHeader>
+            
+            <CardContent classNamePriceCalculator;
